@@ -15,6 +15,7 @@ class App extends Component {
 
     this.state = {
       added_file_hash: null,
+      token_id: null,
       web3: null
     }
     this.ipfsApi = ipfsAPI('localhost', '5001')
@@ -87,9 +88,41 @@ class App extends Component {
 
   }
 
-  handleSubmit = (event) => {
-    console.log("fsdajkl;fsdalkj;dsfajk;sfddffdaskj;") 
+  handleTokenId = (event) => {
     event.preventDefault();
+    this.setState({token_id: event.target.value});
+  }
+
+  handleSubmit = (event) => {
+    event.preventDefault();
+    console.log("fsdajkl;fsdalkj;dsfajk;sfddffdaskj;") 
+  }
+
+  handleSubmit2 = (event) => {
+    event.preventDefault();
+    const contract = require('truffle-contract')
+    const meritToken = contract(MeritToken)
+    meritToken.setProvider(this.state.web3.currentProvider)
+
+    // Declaring this for later so we can chain functions on SimpleStorage.
+    var meritInstance;
+    // Get accounts.
+    this.state.web3.eth.getAccounts((error, accounts) => {
+      meritToken.deployed().then((instance) => {
+        meritInstance = instance
+
+        // Stores a given value, 5 by default.
+        return meritInstance.transcripts(this.state.token_id);
+      }).then((result) => {
+        // Get the value from the contract to prove it worked.
+        if (result) {
+          console.log(result)
+          this.setState({added_file_hash: result});
+        }
+        return result; 
+      })
+    })
+
   }
 
   render() {
@@ -103,12 +136,20 @@ class App extends Component {
           <div className="pure-g">
             <div className="pure-u-1-1">
               <h1>Good to Go!</h1>
-              <h2></h2>
+              <h2>Upload your transcript!</h2>
               <form id='captureMedia' onSubmit={this.handleSubmit}>
                 <input type='file' onChange={this.captureFile} />
               </form>
+              <br/>
+              <br/>
+              <p>Your transcript is at</p>
               <a href={'http://localhost:8080/ipfs/' + this.state.added_file_hash}>{this.state.added_file_hash}</a>
-            </div>
+              <br/><p>Or give your token id:</p>
+              <form id='captureTokenId' onSubmit={this.handleSubmit2}>
+                <input type='text' onChange={this.handleTokenId} />
+                <input type='submit' />
+              </form>
+           </div>
           </div>
         </main>
       </div>
