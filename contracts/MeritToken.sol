@@ -16,10 +16,7 @@ contract MeritToken is ERC721Token {
   function mint(address _to, string _transcriptHash) public {
   	uint256 tokenId = totalSupply();
     super._mint(_to, tokenId);
-    
   	transcripts[tokenId] = _transcriptHash;
   }
-
-
 
 }
